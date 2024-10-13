@@ -1,0 +1,1 @@
+https://moodle.uns.edu.ar/moodle/pluginfile.php/1730516/mod_resource/content/1/Procesos%20-%20Hilos%20Problemas%20-%202024.pdf
