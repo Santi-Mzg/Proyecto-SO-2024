@@ -9,7 +9,7 @@
 #define CANT_ELFOS 6
 
 sem_t elfosOrenos, renosListos, elfosConProblemas, armarTrineo, santaAyudaElfo,
-renosEnPoloNorte, elfosParaDespertarASanta, grupo; 
+renosEnPoloNorte, elfosParaDespertarASanta; 
 
 pthread_mutex_t mutexRenos, mutexElfos;
 
@@ -119,7 +119,6 @@ int main() {
     sem_init(&santaAyudaElfo, 0, 0); 
     sem_init(&renosEnPoloNorte, 0, 9); 
     sem_init(&elfosParaDespertarASanta, 0, 3); 
-    sem_init(&grupo, 0, 3); 
     
     for(int i = 0; i < CANT_RENOS; i++){
         pthread_create(&threadRenos[i], NULL, reno, NULL);
@@ -149,7 +148,6 @@ int main() {
     sem_destroy(&santaAyudaElfo); 
     sem_destroy(&renosEnPoloNorte); 
     sem_destroy(&elfosParaDespertarASanta); 
-    sem_destroy(&grupo); 
     
     return 0;
 } 
