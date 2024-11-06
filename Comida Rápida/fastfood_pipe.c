@@ -85,10 +85,11 @@ void employee(int pipe[2], const char *menu, int menu_delay)
             fflush(stdout);
 
             sleep(menu_delay);
-
+            
             printf("Empleado(%s) FINALIZO menu(%d, %s) para cliente(%d, %s)\n",
                    menu, order.menu_id, get_menu_str(order.menu_id), order.client_id, get_vip_str(order.vip));
             fflush(stdout);
+            write(pipe_order_completed[order.client_id][1], &order, sizeof(order));
         }
     }
     exit(0);
@@ -169,6 +170,11 @@ void client(int pipe[2], int client_id, int menu_id, bool vip)
 
             printf("Cliente(%d, %s) ORDENA menu: %s.\n", client_id, get_vip_str(vip), get_menu_str(menu_id));
             fflush(stdout);
+
+            read(pipe_order_completed[client_id][0], &order, sizeof(order)); //espera la orden
+            printf("Cliente(%ld, %s) RECIBE la orden(%s) y se va contento.\n", client_id, get_vip_str(vip), get_menu_str(menu_id));
+            fflush(stdout);
+
             exit(0);
         }
     }
@@ -237,7 +243,9 @@ void dispatcher()
     fcntl(pipe_entrance_queue[0], F_SETFL, O_NONBLOCK);
     fcntl(pipe_entrance_queue_vip[0], F_SETFL, O_NONBLOCK);
 
-    while (true)
+    int clients_dispatched = 0;
+    
+    while (clients_dispatched < NUMBERS_OF_CLIENTS)
     {
         ClientOrder order;
         int read_status = read(pipe_entrance_queue_vip[0], &order, sizeof(order)); // intento primero obtener una order desde la cola vip
@@ -249,6 +257,7 @@ void dispatcher()
         if (read_status > 0)
         {
             sleep(DISPATCHER_DELAY);
+            clients_dispatched++;
             printf("Empleado DESPACHA menu para Cliente(%d, %s): %s\n", order.client_id, get_vip_str(order.vip), get_menu_str(order.menu_id));
             fflush(stdout);
             switch (order.menu_id)
@@ -280,14 +289,22 @@ void main()
 {
     pid_t pid;
 
+    for (int i = 0; i < NUMBERS_OF_CLIENTS; i++)
+    {
+        pipe(pipe_order_completed[i]);
+    }
+
     init_all_employess();
     sleep(3);
     init_all_clients();
     sleep(1);
     dispatcher();
 
-    for (int i = 0; i < NUMBERS_OF_CLIENTS + 4; i++)
+    for (int i = 0; i < NUMBERS_OF_CLIENTS; i++)
     {
         wait(NULL);
     }
+
+    printf("Todos los clientes finalizaron\n");
+    exit(0);
 }
