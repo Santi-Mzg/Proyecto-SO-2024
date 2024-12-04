@@ -47,9 +47,7 @@ int main(){
 				execv(path, args);
 				exit(0);
 			}
-			//execv();
-			//eliminarDirectorio(d);
-			//limpiar();
+			
 		}
 		else if(strcmp("mkfile",comando) == 0){
 			scanf("%s", d);
@@ -59,8 +57,6 @@ int main(){
 				execv(path, args);
 				exit(0);
 			}
-			//crearArchivo(d);
-			//limpiar();
 		}
 		else if(strcmp("ls",comando) == 0){
 			scanf("%s", d);
@@ -70,8 +66,6 @@ int main(){
 				execv(path, args);
 				exit(0);
 			}			
-			//listarContenidoDirectorio(d);
-			//limpiar();
 		}
 		else if(strcmp("showfile", comando) == 0){
 			scanf("%s", d);
@@ -81,8 +75,6 @@ int main(){
 				execv(path, args);
 				exit(0);
 			}	
-			//mostrarContenidoArchivo(d);
-			//limpiar();
 		}
 		else if(strcmp("help",comando) == 0){
 			char *path = "./ayuda";
@@ -91,7 +83,6 @@ int main(){
 				execv(path, args);
 				exit(0);
 			}
-			//ayuda();
 		}
 		else if(strcmp("fileperm",comando) == 0){
 			scanf("%s", d);
@@ -102,8 +93,6 @@ int main(){
 				execv(path, args);
 				exit(0);
 			}
-			//modificarPermisos(d, val);
-			//limpiar();
 		}
 		else if(strcmp("exit",comando) == 0){
 			printf("\n Ha salido del MiniShell.\n");
@@ -111,6 +100,7 @@ int main(){
 		else{
 			printf("Comando incorrecto, utilice 'help' para conocer los comandos.\n\n");
 		}
+		limpiar();
 		wait(NULL);
 		printf("\n");
 	

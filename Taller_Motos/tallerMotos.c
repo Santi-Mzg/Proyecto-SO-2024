@@ -5,21 +5,15 @@
 #include <time.h>
 #include <unistd.h> 
 
-// Secuencia: ABABCABCDABABCABCD
 
-sem_t construirNuevaMoto, rueda, chasis, motor, pintarMoto, pintura, entregarMoto; 
+sem_t rueda, chasis, motor, pintura, construirNuevaMoto, eqExtra; 
 
 void *operarioRuedas(void *arg) { 
     while (1) { 
         sem_wait(&construirNuevaMoto);
-        printf("NUEVA MOTO EN CONSTRUCCIÓN\n");
         
         sleep(1);  
         printf("Se construyó una rueda\n");
-        sem_post(&rueda);
-        
-        sleep(1);  
-        printf("Se construyó la segunda rueda\n");
         sem_post(&rueda);
     } 
 } 
@@ -42,20 +36,23 @@ void *operarioMotor(void *arg) {
         sleep(1);  
         printf("Se agregó el motor\n");
         sem_post(&motor);
-        sem_post(&motor);
-        sem_post(&pintarMoto);
     } 
 } 
 
 void *operarioPintorRojo(void *arg) { 
     while (1) { 
         sem_wait(&motor);
-
-        if(!sem_trywait(&pintarMoto)){  // Sin lock para que halla condición de carrera
-            sleep(2);  
-            printf("Se pintó la moto de ROJO\n");
+        sleep(2);  
+        printf("Se pintó la moto de ROJO\n");
+        if(sem_trywait(&eqExtra) == 0){
             sem_post(&pintura);
-            sem_post(&entregarMoto);
+        }
+        else {
+            sem_post(&eqExtra);
+            sem_post(&construirNuevaMoto);
+            sem_post(&construirNuevaMoto);
+            printf("MOTO ENTREGADA\n");
+            printf("NUEVA MOTO EN CONSTRUCCIÓN\n");
         }
     } 
 } 
@@ -63,12 +60,18 @@ void *operarioPintorRojo(void *arg) {
 void *operarioPintorVerde(void *arg) { 
     while (1) { 
         sem_wait(&motor);
+        sleep(2);  
+        printf("Se pintó la moto de VERDE\n");
 
-        if(!sem_trywait(&pintarMoto)){  // Sin lock para que halla condición de carrera
-            sleep(2);  
-            printf("Se pintó la moto de VERDE\n");
+        if(sem_trywait(&eqExtra) == 0){ // Si se le agrega eq. extra
             sem_post(&pintura);
-            sem_post(&entregarMoto);
+        }
+        else { // Sino se entrega
+            sem_post(&eqExtra);
+            sem_post(&construirNuevaMoto);
+            sem_post(&construirNuevaMoto);
+            printf("MOTO ENTREGADA\n");
+            printf("NUEVA MOTO EN CONSTRUCCIÓN\n");
         }
     } 
 } 
@@ -76,35 +79,25 @@ void *operarioPintorVerde(void *arg) {
 void *operarioEquipamientoExtra(void *arg) { 
     while (1) { 
         sem_wait(&pintura);
-        sem_wait(&pintura);
         sleep(2);  
-        printf("A esta moto SE le agregó EQUIPAMIENTO EXTRA\n");
-        sem_post(&entregarMoto);
-        sem_post(&entregarMoto);
-    } 
-} 
-
-void *entregaDelVehiculo(void *arg) { 
-    while (1) { 
-        sem_wait(&entregarMoto);
-        sem_wait(&entregarMoto);
-        sleep(1);  
-        printf("Se terminó y entregó la moto\n");
+        printf("Se agrega EQUIPAMIENTO EXTRA\n");
         sem_post(&construirNuevaMoto);
+        sem_post(&construirNuevaMoto);
+        printf("MOTO ENTREGADA\n");
+        printf("NUEVA MOTO EN CONSTRUCCIÓN\n");
     } 
 } 
 
 int main() { 
 
-    pthread_t tOperarioRuedas, tOperarioChasis, tOperarioMotor, tOperarioPintorRojo, tOperarioPintorVerde, tOperarioEquipamientoExtra, tEntregarMoto;
+    pthread_t tOperarioRuedas, tOperarioChasis, tOperarioMotor, tOperarioPintorRojo, tOperarioPintorVerde, tOperarioEquipamientoExtra;
     
-    sem_init(&construirNuevaMoto, 0, 1); 
     sem_init(&rueda, 0, 0); 
     sem_init(&chasis, 0, 0); 
     sem_init(&motor, 0, 0); 
     sem_init(&pintura, 0, 0); 
-    sem_init(&pintarMoto, 0, 0);
-    sem_init(&entregarMoto, 0, 1); 
+    sem_init(&construirNuevaMoto, 0, 2); 
+    sem_init(&eqExtra, 0, 0);
 
     pthread_create(&tOperarioRuedas, NULL, operarioRuedas, NULL); 
     pthread_create(&tOperarioChasis, NULL, operarioChasis, NULL); 
@@ -112,7 +105,6 @@ int main() {
     pthread_create(&tOperarioPintorRojo, NULL, operarioPintorRojo, NULL);
     pthread_create(&tOperarioPintorVerde, NULL, operarioPintorVerde, NULL);
     pthread_create(&tOperarioEquipamientoExtra, NULL, operarioEquipamientoExtra, NULL);
-    pthread_create(&tEntregarMoto, NULL, entregaDelVehiculo, NULL);
     
     pthread_join(tOperarioRuedas, NULL); 
     pthread_join(tOperarioChasis, NULL); 
@@ -120,7 +112,6 @@ int main() {
     pthread_join(tOperarioPintorRojo, NULL);
     pthread_join(tOperarioPintorVerde, NULL);
     pthread_join(tOperarioEquipamientoExtra, NULL);
-    pthread_join(tEntregarMoto, NULL); 
     
     
 

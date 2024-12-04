@@ -19,7 +19,8 @@ void main(int argc, char *argv[]){
 	}
 	else{
 		while ((dire = readdir(d)) != NULL){//mientras se pueda leer listamos el contenido
-			printf("%s | ", dire->d_name);
+			if(dire->d_name != ".." && dire->d_name != ".") 
+				printf("%s | ", dire->d_name);
 		}
 		printf("\n");
 	}

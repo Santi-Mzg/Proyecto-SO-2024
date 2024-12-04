@@ -172,7 +172,7 @@ void client(int pipe[2], int client_id, int menu_id, bool vip)
             fflush(stdout);
 
             read(pipe_order_completed[client_id][0], &order, sizeof(order)); //espera la orden
-            printf("Cliente(%ld, %s) RECIBE la orden(%s) y se va contento.\n", client_id, get_vip_str(vip), get_menu_str(menu_id));
+            printf("Cliente(%d, %s) RECIBE la orden(%s) y se va contento.\n", client_id, get_vip_str(vip), get_menu_str(menu_id));
             fflush(stdout);
 
             exit(0);

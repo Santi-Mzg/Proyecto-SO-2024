@@ -10,6 +10,10 @@
 void main(int argc, char *argv[]){
 	char dir[100];
 	strncpy(dir, argv[1], sizeof(dir));
-	rmdir(argv[1]);
-	printf("Directorio eliminado correctamente");
+	int resultado = rmdir(dir);
+	if(resultado == 0)
+		printf("Directorio eliminado correctamente");
+	else
+		perror("Error al eliminar el directorio");
+	
 }

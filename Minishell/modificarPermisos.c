@@ -8,9 +8,11 @@
 
 void main(int argc, char *argv[]){	
 	char dir[100];
+	char *endptr = NULL;
 	strncpy(dir, argv[1], sizeof(dir));
  	int valor = atoi(argv[2]);
- 	chmod(dir, valor);
-	printf("permisos modificados correctamente");
+ 	int modo = strtol(argv[2], &endptr, 8);
+ 	chmod(dir, modo);
+	printf("Permisos modificados correctamente");
 }
 
